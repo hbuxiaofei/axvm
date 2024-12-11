@@ -30,7 +30,7 @@ axdevice = { git = "https://github.com/arceos-hypervisor/axdevice.git", branch =
 axdevice_base = { git = "https://github.com/arceos-hypervisor/axdevice_crates.git", branch = "inject_interrupt" }
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
-x86_vcpu = { git = "https://github.com/arceos-hypervisor/x86_vcpu.git", branch = "inject_interrupt" }
+x86_vcpu = { git = "https://github.com/hbuxiaofei/x86_vcpu.git", branch = "inject_interrupt" }
 
 [target.'cfg(target_arch = "riscv64")'.dependencies]
 riscv_vcpu = { git = "https://github.com/arceos-hypervisor/riscv_vcpu.git" }
