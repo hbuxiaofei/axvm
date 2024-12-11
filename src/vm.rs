@@ -103,6 +103,7 @@ impl<H: AxVMHal, U: AxVCpuHal> AxVM<H, U> {
                 // Todo: Perhaps we can merge the management of passthrough device memory
                 //       into the device configuration file.
                 if mapping_flags.contains(MappingFlags::DEVICE) {
+                    debug!("Device map addr {:#x} size {:}", mem_region.gpa, mem_region.size);
                     address_space.map_linear(
                         GuestPhysAddr::from(mem_region.gpa),
                         HostPhysAddr::from(mem_region.gpa),
@@ -271,12 +272,23 @@ impl<H: AxVMHal, U: AxVCpuHal> AxVM<H, U> {
                         .handle_mmio_write(*addr, (*width).into(), *data as usize);
                     true
                 }
-                AxVCpuExitReason::IoRead { port: _, width: _ } => true,
+                AxVCpuExitReason::IoRead { port, width } => {
+                    debug!("IoRead: {port:#x?} {width:#x?}");
+                    let val = self.get_devices()
+                        .handle_port_read(*port, (*width).into())?;
+                    vcpu.set_gpr(0, val);
+                    true
+                }
                 AxVCpuExitReason::IoWrite {
-                    port: _,
-                    width: _,
-                    data: _,
-                } => true,
+                    port,
+                    width,
+                    data,
+                } => {
+                    debug!("IoWrite: {port:#x?} {width:#x?} {data:#x?}");
+                    self.get_devices()
+                        .handle_port_write(*port, (*width).into(), *data as usize);
+                    true
+                }
                 AxVCpuExitReason::NestedPageFault { addr, access_flags } => self
                     .inner_mut
                     .address_space
